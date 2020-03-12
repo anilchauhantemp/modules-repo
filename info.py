@@ -37,7 +37,7 @@ def register(cb):
 class InfoMod(loader.Module):
     """Provides system information about the computer hosting this bot"""
     strings = {"name": "System Info ",
-               "info_title": "<b>System Info 👨🏻‍💻</b>",
+               "info_title": "<b>System Infomation 👨🏻‍💻</b>",
                "kernel": "<b>Kernel:</b> <code>{}</code>",
                "arch": "<b>Arch:</b> <code>{}</code>",
                "os": "<b>OS:</b> <code>{}</code>",
