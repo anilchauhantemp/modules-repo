@@ -1,5 +1,3 @@
-# -*- coding: future_fstrings -*-
-
 #    Friendly Telegram (telegram userbot)
 #    Copyright (C) 2018-2019 The Authors
 
@@ -18,8 +16,7 @@
 
 from .. import loader, utils
 import logging
-import urllib
-import requests
+from requests import get
 
 logger = logging.getLogger(__name__)
 
@@ -28,26 +25,23 @@ def register(cb):
     cb(LetMeGoogleThatForYou())
 
 
-@loader.tds
 class LetMeGoogleThatForYou(loader.Module):
     """Let me Google that for you, coz you too lazy to do that yourself."""
-    strings = {"name": "LetMeGoogleThatForYou",
-               "result": "<b>Here you go, help yourself.</b>\n<a href='{}'>{}</a>",
-               "default": "How to use Google?"}
-
     def __init__(self):
-        self.name = self.strings["name"]
+        self.name = _("LetMeGoogleThatForYou")
 
     async def lmgtfycmd(self, message):
         """Use in reply to another message or as .lmgtfy <text>"""
-        text = utils.get_args_raw(message)
-        if not text:
-            if message.is_reply:
-                text = (await message.get_reply_message()).message
-            else:
-                text = self.strings["default"]
-        query_encoded = urllib.parse.quote_plus(text)
-        lmgtfy_url = f"http://lmgtfy.com/?s=g&iie=1&q={query_encoded}"
-        payload = {"format": "json", "url": lmgtfy_url}
-        r = requests.get("http://is.gd/create.php", params=payload)
-        await utils.answer(message, self.strings["result"].format((await utils.run_sync(r.json))["shorturl"], text))
+        if len(utils.get_args_raw(message)) == 0:
+            text = (await message.get_reply_message()).message
+        else:
+            text = utils.get_args_raw(message.message)
+        if len(text) == 0:
+            await message.edit(_("I need something to Google for them."))
+            return
+        query_encoded = text.replace(" ", "+")
+        lfy_url = f"http://lmgtfy.com/?s=g&iie=1&q={query_encoded}"
+        payload = {'format': 'json', 'url': lfy_url}
+        r = get('http://is.gd/create.php', params=payload)
+        await message.edit(f"Here you go, help yourself.\
+        \n<p><a href='{r.json()['shorturl']}'>{text}</a></p>")
